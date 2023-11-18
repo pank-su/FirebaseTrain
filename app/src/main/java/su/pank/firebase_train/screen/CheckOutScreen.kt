@@ -3,7 +3,9 @@ package su.pank.firebase_train.screen
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -26,13 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import su.pank.firebase_train.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CheckOutScreen(vm: UserViewModel) {
+fun CheckOutScreen(vm: UserViewModel, navController: NavController) {
     var timePickerDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -50,47 +53,55 @@ fun CheckOutScreen(vm: UserViewModel) {
             vm.date =
                 LocalDate.fromEpochDays((datePickerState.selectedDateMillis!! / (60 * 60 * 1000 * 24)).toInt())
     }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        OutlinedTextField(
-            value = vm.date.toString(),
-            onValueChange = {},
-            label = { Text(text = "Дата") },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                datePickerDialog = true
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = vm.date.toString(),
+                onValueChange = {},
+                label = { Text(text = "Дата") },
+                interactionSource = remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    datePickerDialog = true
+                                }
                             }
                         }
-                    }
-                }, readOnly = true
-        )
-        OutlinedTextField(
-            value = vm.time.toString(),
-            onValueChange = {},
-            label = { Text(text = "Время") },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                timePickerDialog = true
+                    }, readOnly = true
+            )
+            OutlinedTextField(
+                value = vm.time.toString(),
+                onValueChange = {},
+                label = { Text(text = "Время") },
+                interactionSource = remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    timePickerDialog = true
+                                }
                             }
                         }
-                    }
-                }, readOnly = true
-        )
-        OutlinedTextField(value = vm.location, onValueChange = {
-            vm.location = it
-        }, label = { Text(text = "Место") })
-
+                    }, readOnly = true
+            )
+            OutlinedTextField(value = vm.location, onValueChange = {
+                vm.location = it
+            }, label = { Text(text = "Место") })
+            
+        }
+        Button(onClick = {
+            vm.checkout()
+            navController.navigate("ConfirmedScreen")
+                         }, enabled = vm.location.isNotEmpty(), modifier = Modifier.align(Alignment.BottomCenter)) {
+            Text(text = "Заказать")
+        }
     }
     if (timePickerDialog) {
         Dialog(onDismissRequest = { timePickerDialog = false }) {

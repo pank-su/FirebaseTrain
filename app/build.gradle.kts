@@ -42,7 +42,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     packaging {
         resources {
@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.material.icons.extended)
     implementation(libs.firebase.auth)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.firestore.ktx)

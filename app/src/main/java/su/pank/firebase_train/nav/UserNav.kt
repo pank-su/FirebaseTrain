@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import su.pank.firebase_train.screen.CartScreen
 import su.pank.firebase_train.screen.CheckOutScreen
+import su.pank.firebase_train.screen.ConfirmedScreen
 import su.pank.firebase_train.screen.MenuScreen
 import su.pank.firebase_train.viewmodel.UserViewModel
 
@@ -23,7 +24,10 @@ fun UserNav() {
             CartScreen(userViewModel, navController)
         }
         composable("CheckOutScreen"){
-            CheckOutScreen(vm = userViewModel)
+            CheckOutScreen(userViewModel, navController)
+        }
+        composable("ConfirmedScreen"){
+            ConfirmedScreen(navController = navController)
         }
     }
 }
