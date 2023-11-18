@@ -1,9 +1,9 @@
 package su.pank.firebase_train.screen
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import su.pank.firebase_train.nav.UserNav
 
 @Composable
 fun UserScreen() {
-    Text(text = "User Screen")
+    UserNav()
 }

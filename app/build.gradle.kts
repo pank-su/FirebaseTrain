@@ -47,11 +47,16 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.add("META-INF/versions/9/previous-compilation-data.bin")
+
         }
+
     }
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.datetime)
 
     implementation(libs.compose.auth.ui)
 
@@ -64,9 +69,11 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.firebase.auth)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
