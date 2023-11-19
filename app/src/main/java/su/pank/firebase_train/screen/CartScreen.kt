@@ -27,7 +27,7 @@ fun CartScreen(vm: UserViewModel, navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             Box(modifier = Modifier.height(500.dp)) {
-                Menu(menu = vm.cart.toHashSet().toList(), vm = vm)
+                Menu(menu = vm.cart.toHashSet().toList(), vm = vm, isManager = false)
             }
             Text(
                 text = "Сумма: ${vm.cart.sumOf { it.price }} рублей",

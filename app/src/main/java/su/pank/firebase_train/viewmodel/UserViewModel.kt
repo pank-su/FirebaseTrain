@@ -21,7 +21,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import su.pank.firebase_train.models.MenuItem
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class UserViewModel : ViewModel() {
 
@@ -44,7 +44,7 @@ class UserViewModel : ViewModel() {
             emit(db.collection("menu").get().await().documents.map {
                 it.toMenuItem()
             })
-            kotlinx.coroutines.delay(10.minutes)
+            kotlinx.coroutines.delay(2.seconds)
         }
     }
 
@@ -64,7 +64,7 @@ class UserViewModel : ViewModel() {
     }
 }
 
-private fun DocumentSnapshot.toMenuItem(): MenuItem = MenuItem(
+fun DocumentSnapshot.toMenuItem(): MenuItem = MenuItem(
     this.getString("name")!!,
     this.getBoolean("available")!!,
     this.getString("composition")!!,

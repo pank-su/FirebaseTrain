@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -22,6 +23,7 @@ class AuthViewModel : ViewModel() {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var secondPassword by mutableStateOf("")
+    var invalidAuth by mutableStateOf(false)
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -34,8 +36,12 @@ class AuthViewModel : ViewModel() {
     fun loginOrReg() {
         if (!isReg)
             CoroutineScope(Dispatchers.IO).launch {
-                val result = Firebase.auth.signInWithEmailAndPassword(email, password).await()
-                _user.emit(result.user)
+               try {
+                   val result = Firebase.auth.signInWithEmailAndPassword(email, password).await()
+                   _user.emit(result.user)
+               }catch (e: FirebaseAuthException) {
+                   invalidAuth = true
+               }
             }
         else{
             CoroutineScope(Dispatchers.IO).launch {

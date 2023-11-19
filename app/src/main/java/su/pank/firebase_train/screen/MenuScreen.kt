@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
@@ -34,8 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import su.pank.firebase_train.models.MenuItem
 import su.pank.firebase_train.viewmodel.UserViewModel
 
@@ -43,7 +49,7 @@ import su.pank.firebase_train.viewmodel.UserViewModel
 fun MenuScreen(vm: UserViewModel, navController: NavHostController) {
     val menu by vm.menu.collectAsState(initial = listOf())
     Box(modifier = Modifier.fillMaxSize()) {
-        Menu(menu, vm)
+        Menu(menu, vm, false)
         if (vm.cart.isNotEmpty())
             Button(
                 onClick = { navController.navigate("Cart") }, modifier = Modifier
@@ -59,7 +65,8 @@ fun MenuScreen(vm: UserViewModel, navController: NavHostController) {
 @Composable
 fun Menu(
     menu: List<MenuItem>,
-    vm: UserViewModel
+    vm: UserViewModel = viewModel(),
+    isManager: Boolean = false
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -104,15 +111,28 @@ fun Menu(
                             style = MaterialTheme.typography.bodyMedium, maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Text(text = "${menuItem.price} рублей", )
+                        Text(text = "${menuItem.price} рублей")
                     }
                     if (!vm.cart.contains(menuItem))
-                        IconButton(
-                            onClick = { vm.cart.add(menuItem) },
-                            Modifier.requiredSize(48.dp)
-                        ) {
-                            Icon(Icons.Default.ShoppingCart, null)
-                        }
+                        if (!isManager)
+                            IconButton(
+                                onClick = { vm.cart.add(menuItem) },
+                                Modifier.requiredSize(48.dp)
+                            ) {
+                                Icon(Icons.Default.ShoppingCart, null)
+                            }
+                        else
+                            IconButton(
+                                onClick = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        menuItem.reference.delete().await()
+
+                                    }
+                                },
+                                Modifier.requiredSize(48.dp)
+                            ) {
+                                Icon(Icons.Default.Close, null)
+                            }
                     else
                         Column(
                             Modifier.fillMaxHeight(),

@@ -1,6 +1,7 @@
 package su.pank.firebase_train.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -13,7 +14,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import su.pank.firebase_train.models.MenuItem
 import su.pank.firebase_train.models.Order
 
 sealed class CourierScreenState {
@@ -22,27 +22,44 @@ sealed class CourierScreenState {
 }
 
 class CourierViewModel : ViewModel() {
+
+
     private val _state = MutableStateFlow<CourierScreenState>(CourierScreenState.Loading)
     val state = _state.asStateFlow()
     val db = Firebase.firestore
 
 
     init {
+        reloadOrders()
+    }
+
+    private fun reloadOrders(){
         CoroutineScope(Dispatchers.IO).launch {
-            _state.emit(CourierScreenState.Loaded(db.collection("orders").get().await().documents.map {
-                it.toOrder()
-            }))
+            _state.emit(
+                CourierScreenState.Loaded(
+                    db.collection("orders").get().await().documents.map {
+                        it.toOrder()
+                    })
+            )
         }
+    }
+
+    fun removeOrder(order: Order) {
+        db.collection("orders").document(order.reference.id).delete()
+        reloadOrders()
     }
 }
 
-private fun DocumentSnapshot.toOrder() = Order(
+private suspend fun DocumentSnapshot.toOrder() = Order(
     this.getTimestamp("datetime")!!.let {
         Instant.fromEpochSeconds(it.seconds, it.nanoseconds).toLocalDateTime(
             TimeZone.currentSystemDefault()
         )
     },
     this.getString("location")!!,
-    menuItems = this.get("menuItems") as List<MenuItem>,
-    this.getString("uid")!!
+    menuItems = (this.get("menuItems") as List<DocumentReference>).map {
+        it.get().await().toMenuItem()
+    },
+    this.getString("uid")!!,
+    this.reference
 )
